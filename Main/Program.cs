@@ -68,11 +68,35 @@ namespace Main
                         }
                         break;
 
+                    case 2:
+                        try
+                        {
+                            string fileName = UserEnteringFileName();
+                            department = DeserializeDepartmentXML(fileName);
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.WriteLine($"Error: {exception.Message}");
+                        }
+                        break;
+
                     case 3:
                         try
                         {
                             string fileName = UserEnteringFileName();
                             SerializeDepartmentJSON(fileName, department);
+                        }
+                        catch (Exception exception)
+                        {
+                            Console.WriteLine($"Error: {exception.Message}");
+                        }
+                        break;
+
+                    case 4:
+                        try
+                        {
+                            string fileName = UserEnteringFileName();
+                            SerializeDepartmentXML(fileName, department);
                         }
                         catch (Exception exception)
                         {
@@ -126,7 +150,7 @@ namespace Main
         }
 
         /// <summary>
-        /// Reads Department from JSON file <see cref="Department"/>
+        /// Reads Department data from JSON file <see cref="Department"/>
         /// </summary>
         /// <returns></returns>
         public static Department DeserializeDepartmentJSON(string fileName)
@@ -155,12 +179,39 @@ namespace Main
             writer.Close();
         }
 
+        /// <summary>
+        /// Reads Department data from XML file <see cref="Department"/>
+        /// </summary>
+        /// <returns></returns>
+        public static Department DeserializeDepartmentXML(string fileName)
+        {
+            Department department;
 
+            var reader = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+            var inputSerializer = new DataContractSerializer(typeof(Department));
 
+            department = (Department)inputSerializer.ReadObject(reader);
+            reader.Close();
+
+            return department;
+        }
+
+        /// <summary>
+        /// Saves Department data in XML file format <see cref="Department"/>
+        /// </summary>
+        /// <returns></returns>
+        public static void SerializeDepartmentXML(string fileName, Department department)
+        {
+            var writer = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+            var serXml = new DataContractSerializer(typeof(Department)); // For serializing to XML
+
+            serXml.WriteObject(writer, department);
+            writer.Close();
+        }
 
 
         /// <summary>
-        /// Writes Worker to Excel file <see cref="Department"/>
+        /// Writes Department data to Excel file <see cref="Department"/>
         /// </summary>
         /// <returns></returns>
         public static void WriteDepartmentToExcel(string fileName, Department department)
@@ -170,18 +221,17 @@ namespace Main
             _Workbook excelWorkBook;
             _Worksheet excelWorkSheet;
 
-            //Start Excel and get Application object.
+            // Start Excel and get Application object.
             excelApp = new Application
             {
                 Visible = false
             };
 
-            //Get a new workbook and worksheet
+            // Get a new workbook and worksheet
             excelWorkBooks = excelApp.Workbooks;
             excelWorkBook = excelWorkBooks.Add();
             excelWorkSheet = (_Worksheet)excelWorkBook.ActiveSheet;
 
-            // nested for loop for inputing data in to cells
             excelWorkSheet.Cells[1, 1] = "Department Name";
             excelWorkSheet.Cells[1, 2] = "Technical Support";
             excelWorkSheet.Cells[3, 1] = "Workers";
@@ -201,6 +251,7 @@ namespace Main
                 excelWorkSheet.Cells[workerRow, 3] = worker.PayRate;
                 ++workerRow;
             }
+
             int shiftRow = 6;
             foreach (Shift shift in department.Shifts)
             {
@@ -210,40 +261,40 @@ namespace Main
                 ++shiftRow;
             }
 
-            ////Range excelRange = excelWorkSheet.Range["A1"];
-            //excelRange.Font.Bold = true;
-            //excelRange.Font.Underline = true;
+            Range cellA1 = excelWorkSheet.Range["A1"];
+            cellA1.Font.Bold = true;
+            cellA1.Font.Underline = true;
+
+            Range cellA3 = excelWorkSheet.Range["A3"];
+            cellA3.Font.Bold = true;
+
+            Range cellF3 = excelWorkSheet.Range["F3"];
+            cellF3.Font.Bold = true;
+
+            Range row5 = excelWorkSheet.Range["A5", "H5"];
+            row5.Font.Bold = true;
+            row5.Font.Underline = true;
 
             excelWorkBook.SaveAs(fileName);
             excelWorkBook.Close();
             excelApp.Quit();
 
             // Need to release COM objects.These are hidden resources that get allocated
-            if (excelWorkSheet != null)
-            {
-                Marshal.ReleaseComObject(excelWorkSheet);
-            }
+            if (excelWorkSheet != null) Marshal.ReleaseComObject(excelWorkSheet);
+            
+            if (excelWorkBook != null) Marshal.ReleaseComObject(excelWorkBook);
+            
+            if (excelWorkBooks != null) Marshal.ReleaseComObject(excelWorkBooks);
 
-            if (excelWorkBook != null)
-            {
-                Marshal.ReleaseComObject(excelWorkBook);
-            }
+            if (excelApp != null) Marshal.ReleaseComObject(excelApp);
+            
+            if (cellA1 != null) Marshal.ReleaseComObject(cellA1);
+            
+            if (cellA3 != null) Marshal.ReleaseComObject(cellA3);
+        
+            if (cellF3 != null) Marshal.ReleaseComObject(cellF3);
 
-            if (excelWorkBooks != null)
-            {
-                Marshal.ReleaseComObject(excelWorkBooks);
-            }
-
-            if (excelApp != null)
-            {
-                Marshal.ReleaseComObject(excelApp);
-            }
-
-            //if (excelRange != null)
-            //{
-            //    Marshal.ReleaseComObject(excelRange);
-            //}
+            if (row5 != null) Marshal.ReleaseComObject(row5);
         }
-
     }
 }
