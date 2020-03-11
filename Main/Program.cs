@@ -27,15 +27,24 @@ namespace Main
     public class Program
     {
         /// <summary>
-        /// Presents a menu to the user and performs an action depending on what
-        /// the user chooses to do.
+        /// Displays a menu.
         /// </summary>
         /// <returns></returns>
         private static void Main(string[] args)
         {
+            displayMenu();
+        }
+
+        #region Menu Method
+        /// <summary>
+        /// Displays a menu to the user and performs an action depending on what
+        /// the user chooses to do.
+        /// </summary>
+        public static void displayMenu()
+        {
             var department = new Department();
             int choice;
-            
+
             do
             {
                 Console.WriteLine("Department Menu");
@@ -124,18 +133,21 @@ namespace Main
                         try
                         {
                             Console.WriteLine("Enter worker id: ");
-                            int userEntered = Convert.ToInt32(Console.ReadLine());
+                            int enteredId = Convert.ToInt32(Console.ReadLine());
+                            Worker worker = department.FindWorker(enteredId);
+                            Console.WriteLine(worker.ToString());
                         }
                         catch (Exception exception)
                         {
                             Console.WriteLine($"Error: {exception.Message}");
                         }
                         break;
-
                 }
             } while (choice != 8);
         }
+        #endregion
 
+        #region UserInput Method
         /// <summary>
         /// Asks the user to enter a file name.
         /// </summary>
@@ -148,7 +160,9 @@ namespace Main
 
             return fileName;
         }
+        #endregion
 
+        #region Department Methods
         /// <summary>
         /// Reads Department data from JSON file <see cref="Department"/>
         /// </summary>
@@ -281,20 +295,21 @@ namespace Main
 
             // Need to release COM objects.These are hidden resources that get allocated
             if (excelWorkSheet != null) Marshal.ReleaseComObject(excelWorkSheet);
-            
+
             if (excelWorkBook != null) Marshal.ReleaseComObject(excelWorkBook);
-            
+
             if (excelWorkBooks != null) Marshal.ReleaseComObject(excelWorkBooks);
 
             if (excelApp != null) Marshal.ReleaseComObject(excelApp);
-            
+
             if (cellA1 != null) Marshal.ReleaseComObject(cellA1);
-            
+
             if (cellA3 != null) Marshal.ReleaseComObject(cellA3);
-        
+
             if (cellF3 != null) Marshal.ReleaseComObject(cellF3);
 
             if (row5 != null) Marshal.ReleaseComObject(row5);
         }
+        #endregion
     }
 }
